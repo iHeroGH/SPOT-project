@@ -59,7 +59,7 @@ def main(argv):
         # Wait for some time so we can drive the robot to a new position.
         time.sleep(0.7)
 
-        return True
+    return True
 
 if __name__ == "__main__":
     if not main(sys.argv[1:]):
