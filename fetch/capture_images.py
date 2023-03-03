@@ -23,7 +23,9 @@ def main(argv):
     robot.time_sync.wait_for_sync()
 
     image_client = robot.ensure_client(ImageClient.default_service_name)
-
+    sources = image_client.list_image_sources()
+    print([source.name for source in sources])
+    # return True
     counter = 0
 
     while True:
