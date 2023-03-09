@@ -1,11 +1,7 @@
 <annotation>
 	<folder>front_right_cam</folder>
 	<filename>frontright_fisheye_image_0271.jpg</filename>
-<<<<<<< HEAD
-	<path>path\to\folder\frontright_fisheye_image_0271.jpg</path>
-=======
 	<path>C:\Users\Lina\Documents\SCHOOL\CalPolyPomona\SPOT\fetch\images\SPOT-project\fetch\can\images\front_right_cam\frontright_fisheye_image_0271.jpg</path>
->>>>>>> be30ced4e3a902e49242beaa2ef3237f900dccb8
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -21,17 +17,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-<<<<<<< HEAD
-			<xmin>350</xmin>
-			<ymin>284</ymin>
-			<xmax>401</xmax>
-			<ymax>312</ymax>
-=======
 			<xmin>345</xmin>
 			<ymin>283</ymin>
 			<xmax>412</xmax>
 			<ymax>320</ymax>
->>>>>>> be30ced4e3a902e49242beaa2ef3237f900dccb8
 		</bndbox>
 	</object>
 </annotation>
