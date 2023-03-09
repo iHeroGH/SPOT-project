@@ -3,4 +3,5 @@ spot-sdk/
 models-with-protos/
 ssd_resnet50_v1_fpn_640x640_coco17_tpu-8/
 
-annotations/
+annotations/test.record
+annotations/train.record
