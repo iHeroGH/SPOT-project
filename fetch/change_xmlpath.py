@@ -2,14 +2,14 @@ import os
 import xml.etree.ElementTree as ET
 
 # Define the new path string
-new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\can\images\{}'
+new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\can\images'
 
 # Loop through all the XML files in the directory
 # Make sure in directory that contains annotations folder
 # Loop through all the directories and files within the annotations folder
 print(new_path)
-for dirpath, dirnames, filenames in os.walk('annotations'):
-    print(dirpath.replace('annotations\\', ''))
+
+for dirpath, dirnames, filenames in os.walk('can/annotations/train'):
     for filename in filenames:
         if not filename.endswith('.xml'):
             continue
@@ -22,7 +22,7 @@ for dirpath, dirnames, filenames in os.walk('annotations'):
         filename_without_extension = os.path.splitext(filename)[0]
 
         # Create the new path string
-        new_path_to_image = os.path.join(new_path.format(dirpath.replace('annotations\\', '')), filename_without_extension + '.jpg')
+        new_path_to_image = os.path.join(new_path, filename_without_extension + '.jpg')
 
         # Replace the path with the new value
         path_elem.text = new_path_to_image

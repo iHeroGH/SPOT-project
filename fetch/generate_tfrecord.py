@@ -159,8 +159,6 @@ def main(_):
     examples = xml_to_csv(args.xml_dir)
     grouped = split(examples, 'filename')
     for group in grouped:
-        if not group.filename.startswith('right_fisheye'):
-            continue
         tf_example = create_tf_example(group, path)
         writer.write(tf_example.SerializeToString())
     writer.close()
