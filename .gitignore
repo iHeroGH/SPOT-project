@@ -2,6 +2,7 @@ spot_env*/
 spot-sdk/
 
 models/
+tf-models/
 protoc/
 nvvm/
 
