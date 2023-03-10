@@ -9,7 +9,7 @@ new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\can\image
 # Loop through all the directories and files within the annotations folder
 print(new_path)
 
-for dirpath, dirnames, filenames in os.walk('can/annotations/test'):
+for dirpath, dirnames, filenames in os.walk('can/annotations'):
     for filename in filenames:
         if not filename.endswith('.xml'):
             continue

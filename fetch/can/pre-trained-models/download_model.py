@@ -5,7 +5,7 @@ import os
 # Download and extract model
 MODELS_DIR = '.'
 MODEL_DATE = '20200711'
-MODEL_NAME = 'ssd_resnet50_v1_fpn_640x640_coco17_tpu-8'
+MODEL_NAME = 'efficientdet_d1_coco17_tpu-32'
 MODEL_TAR_FILENAME = MODEL_NAME + '.tar.gz'
 MODELS_DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/tf2/'
 MODEL_DOWNLOAD_LINK = MODELS_DOWNLOAD_BASE + MODEL_DATE + '/' + MODEL_TAR_FILENAME

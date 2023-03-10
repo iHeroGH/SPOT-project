@@ -1,7 +1,9 @@
 spot_env*/
 spot-sdk/
-models-with-protos/
-ssd_resnet50_v1_fpn_640x640_coco17_tpu-8/
 
-annotations/test.record
-annotations/train.record
+models/
+protoc/
+nvvm/
+
+ssd_resnet50_v1_fpn_640x640_coco17_tpu-8/
+efficientdet_d1_coco17_tpu-32/

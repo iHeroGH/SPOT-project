@@ -33,14 +33,14 @@ def main():
         os.makedirs(train_path)
         print('Created path: ' + train_path)
 
-    # # Make sure the test and train directories are empty.
-    # if len(os.listdir(test_path)) > 0:
-    #     print(test_path + ' directory is not empty, aborting.')
-    #     return
+    # Make sure the test and train directories are empty.
+    if len(os.listdir(test_path)) > 0:
+        print(test_path + ' directory is not empty, aborting.')
+        return
 
-    # if len(os.listdir(train_path)) > 0:
-    #     print(train_path + ' directory is not empty, aborting.')
-    #     return
+    if len(os.listdir(train_path)) > 0:
+        print(train_path + ' directory is not empty, aborting.')
+        return
 
     output = []
 
