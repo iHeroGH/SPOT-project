@@ -1,7 +1,8 @@
 spot_env*/
 spot-sdk/
 
-models/
+/fetch/can/models/my_model/*
+
 tf-models/
 protoc/
 nvvm/
