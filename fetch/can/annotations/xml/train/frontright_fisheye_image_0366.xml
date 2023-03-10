@@ -1,0 +1,26 @@
+<annotation>
+	<folder>front_right_cam</folder>
+	<filename>frontright_fisheye_image_0366.jpg</filename>
+	<path>C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\can\images\frontright_fisheye_image_0366.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>480</width>
+		<height>640</height>
+		<depth>1</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>can</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>327</xmin>
+			<ymin>331</ymin>
+			<xmax>366</xmax>
+			<ymax>390</ymax>
+		</bndbox>
+	</object>
+</annotation>
