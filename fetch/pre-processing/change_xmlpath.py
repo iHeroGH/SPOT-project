@@ -2,14 +2,19 @@ import os
 import xml.etree.ElementTree as ET
 
 # Define the new path string
-new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\can\images'
+#new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\can\images'
+
+#new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\trashcan\images'
+new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\trashcan_open\images'
 
 # Loop through all the XML files in the directory
-# Make sure in directory that contains annotations folder
 # Loop through all the directories and files within the annotations folder
 print(new_path)
 
-for dirpath, dirnames, filenames in os.walk('can/annotations'):
+img_dir = 'trashcan_open'  # <- change as needed
+img_annotation_dir = "fetch/" + img_dir + '/annotations/xml'
+
+for dirpath, dirnames, filenames in os.walk(img_annotation_dir):
     for filename in filenames:
         if not filename.endswith('.xml'):
             continue

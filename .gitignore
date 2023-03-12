@@ -9,3 +9,5 @@ nvvm/
 
 ssd_resnet50_v1_fpn_640x640_coco17_tpu-8/
 efficientdet_d1_coco17_tpu-32/
+
+models-with-protos
