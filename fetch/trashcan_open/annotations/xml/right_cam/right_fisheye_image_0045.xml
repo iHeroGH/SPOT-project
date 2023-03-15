@@ -1,0 +1,26 @@
+<annotation>
+	<folder>right_cam</folder>
+	<filename>right_fisheye_image_0045.jpg</filename>
+	<path>C:\Users\Janista\Documents\GitHub\SPOT-project\fetch\trashcan_open\images\right_cam\right_fisheye_image_0045.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>640</width>
+		<height>480</height>
+		<depth>1</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>trashcan_open</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>334</xmin>
+			<ymin>126</ymin>
+			<xmax>408</xmax>
+			<ymax>240</ymax>
+		</bndbox>
+	</object>
+</annotation>
