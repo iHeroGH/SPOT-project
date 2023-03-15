@@ -33,3 +33,11 @@ Go to admin console (must be in admin account)
 2. Go to python/examples/wasd directory in the SDK
 3. Type 'python wasd.py 192.168.80.3' in the terminal
 4. Press 'space' first to turn off ESTOP and 'tab' to terminate
+
+## Labeling Images
+1. Open Terminal
+2. `py.exe -3 -m pip install virtualenv`
+3. `py.exe -3 -m virtualenv my_spot_env`
+4. `python3 -m pip install labelImg` (if you have not yet)
+5. Run `.\my_spot_env\Scripts\activate.bat` wherever my_spot_env is located
+6. Run `labelImg`
