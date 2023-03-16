@@ -1,0 +1,26 @@
+<annotation>
+	<folder>front_cam</folder>
+	<filename>frontright_fisheye_image_0221.jpg</filename>
+	<path>C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\trashcan\images\frontright_fisheye_image_0221.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>480</width>
+		<height>640</height>
+		<depth>1</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>trashcan</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>214</xmin>
+			<ymin>59</ymin>
+			<xmax>331</xmax>
+			<ymax>287</ymax>
+		</bndbox>
+	</object>
+</annotation>
