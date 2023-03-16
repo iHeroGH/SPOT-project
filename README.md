@@ -1,21 +1,25 @@
-## Set up
+## Setting up Virtual Environment
 
 pip install virtualenv
-python -m virtualenv --python=python spot_env
+python -m virtualenv --python=<path_to_python=python> <environment_name=spot_env>
+
+## Entering Virtual Environment
 source spot_env/bin/activate
+(.\spot_env\Scripts\activate on Windows)
 
+## Setting up Boston Dynamics libraries
 python -m pip install --upgrade bosdyn-client bosdyn-mission bosdyn-choreography-client
-
 pip list --format=columns | findstr bosdyn
 
+## Checking connection to SPOT
 ping 192.168.80.3
 
 ## Turning on SPOT
-Holding down button on left, then press button on right
+Holding down button on left (blue - power button), then press button on right (red - motor control)
 
-## Controller
-1. Turn on controller (middle button)
-2. Either log on to regular account or admin account 
+## Using the Controller
+1. Turn on controller (middle button on the top)
+2. Log on to admin account
 
 ## Finding Wifi password to connect to SPOT
 Go to admin console (must be in admin account)
@@ -36,8 +40,6 @@ Go to admin console (must be in admin account)
 
 ## Labeling Images
 1. Open Terminal
-2. `py.exe -3 -m pip install virtualenv`
-3. `py.exe -3 -m virtualenv my_spot_env`
-4. `python3 -m pip install labelImg` (if you have not yet)
-5. Run `.\my_spot_env\Scripts\activate.bat` wherever my_spot_env is located
-6. Run `labelImg`
+2. Connect to the virtual environment
+3. `python -m pip install labelImg` (if you have not yet - must not be on python3.10)
+4. Run `labelImg`
