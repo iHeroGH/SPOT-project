@@ -26,10 +26,11 @@ from bosdyn.api import basic_command_pb2
 from bosdyn.client import frame_helpers
 from bosdyn.client import math_helpers
 
-kImageSources = [
-    'frontleft_fisheye_image', 'frontright_fisheye_image',
-    'left_fisheye_image', 'right_fisheye_image', 'back_fisheye_image'
-]
+kImageSources = ['frontleft_fisheye_image',
+                 'frontright_fisheye_image',
+                 'right_fisheye_image',
+                 'left_fisheye_image',
+                 'back_fisheye_image']
 
 def get_obj_and_img(network_compute_client, server, model, confidence,
                     image_sources, label):
@@ -72,10 +73,12 @@ def get_obj_and_img(network_compute_client, server, model, confidence,
         cv2.imshow("Fetch", img)
         cv2.waitKey(15)
 
+        print(label)
         if len(resp.object_in_image) > 0:
             for obj in resp.object_in_image:
                 # Get the label
                 obj_label = obj.name.split('_label_')[-1]
+                print(obj_label)
                 if obj_label != label:
                     continue
                 conf_msg = wrappers_pb2.FloatValue()
@@ -103,7 +106,7 @@ def get_obj_and_img(network_compute_client, server, model, confidence,
 
 def get_bounding_box_image(response):
     dtype = np.uint8
-    img = np.fromstring(response.image_response.shot.image.data, dtype=dtype)
+    img = np.frombuffer(response.image_response.shot.image.data, dtype=dtype)
     if response.image_response.shot.image.format == image_pb2.Image.FORMAT_RAW:
         img = img.reshape(response.image_response.shot.image.rows,
                           response.image_response.shot.image.cols)
@@ -214,8 +217,8 @@ def main(argv):
         '--person-model',
         help='Person detection model name running on the external server.')
     parser.add_argument('-c',
-                        '--confidence-dogtoy',
-                        help='Minimum confidence to return an object for the dogoy (0.0 to 1.0)',
+                        '--confidence-can',
+                        help='Minimum confidence to return an object for the can (0.0 to 1.0)',
                         default=0.5,
                         type=float)
     parser.add_argument('-e',
@@ -257,25 +260,28 @@ def main(argv):
             holding_toy = False
             while not holding_toy:
                 # Capture an image and run ML on it.
-                dogtoy, image, vision_tform_dogtoy = get_obj_and_img(
+                can, image, vision_tform_can = get_obj_and_img(
                     network_compute_client, options.ml_service, options.model,
-                    options.confidence_dogtoy, kImageSources, 'dogtoy')
+                    options.confidence_can, kImageSources, 'can')
 
-                if dogtoy is None:
+                if can is None:
+                    print("Couldn't detect can")
                     # Didn't find anything, keep searching.
                     continue
+
+                print("Detected can")
 
                 # If we have already dropped the toy off, make sure it has moved a sufficient amount before
                 # picking it up again
                 if vision_tform_hand_at_drop is not None and pose_dist(
-                        vision_tform_hand_at_drop, vision_tform_dogtoy) < 0.5:
-                    print('Found dogtoy, but it hasn\'t moved.  Waiting...')
+                        vision_tform_hand_at_drop, vision_tform_can) < 0.5:
+                    print('Found can, but it hasn\'t moved.  Waiting...')
                     time.sleep(1)
                     continue
 
-                print('Found dogtoy...')
+                print('Found can...')
 
-                # Got a dogtoy.  Request pick up.
+                # Got a can.  Request pick up.
 
                 # Stow the arm in case it is deployed
                 stow_cmd = RobotCommandBuilder.arm_stow_command()
@@ -285,7 +291,7 @@ def main(argv):
                 # -------------------------
                 # # Walk to the object.
                 # walk_rt_vision, heading_rt_vision = compute_stand_location_and_yaw(
-                    # vision_tform_dogtoy, robot_state_client, distance_margin=1.0)
+                    # vision_tform_can, robot_state_client, distance_margin=1.0)
 
                 # move_cmd = RobotCommandBuilder.trajectory_command(
                     # goal_x=walk_rt_vision[0],
@@ -304,7 +310,7 @@ def main(argv):
 
                 # The ML result is a bounding box.  Find the center.
                 (center_px_x,
-                 center_px_y) = find_center_px(dogtoy.image_properties.coordinates)
+                 center_px_y) = find_center_px(can.image_properties.coordinates)
 
                 # Request Pick Up on that pixel.
                 pick_vec = geometry_pb2.Vec2(x=center_px_x, y=center_px_y)
