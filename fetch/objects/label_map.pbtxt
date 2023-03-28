@@ -1,0 +1,9 @@
+item {
+    id: 1
+    name: "can"
+}
+
+item {
+    id: 2
+    name: "trashcan"
+}

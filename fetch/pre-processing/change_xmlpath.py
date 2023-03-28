@@ -8,16 +8,16 @@ import xml.etree.ElementTree as ET
 
 
 # The type of image
-img_dir = 'trashcan'
+img_dir = 'can'
 
 # The camera mode
 cam_mode = 'all'
 
 # The created annotations directory
-img_annotation_dir = "../" + img_dir + '/annotations/xml/' + cam_mode
+img_annotation_dir = "../objects/" + img_dir + '/annotations/xml/' + cam_mode
 
 # The path to set all xml files' images to
-new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch' + f"\\{img_dir}\\images"
+new_path = r'C:\Users\jojom\OneDrive\Desktop\School\SPOT_project\fetch\objects' + f"\\{img_dir}\\images"
 
 # Loop through all the XML files in the directory
 # Loop through all the directories and files within the annotations folder
