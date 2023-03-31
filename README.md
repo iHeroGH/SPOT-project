@@ -40,6 +40,6 @@ Go to admin console (must be in admin account)
 
 ## Labeling Images
 1. Open Terminal
-2. Connect to the virtual environment
+2. Connect to the virtual environment (Windows: `.\my_spot_env\Scripts\activate.bat`) (Linux: `source my_spot_env/bin/activate`)
 3. `python -m pip install labelImg` (if you have not yet - must not be on python3.10)
 4. Run `labelImg`
