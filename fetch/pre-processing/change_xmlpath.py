@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 
 # The type of image
-img_dir = 'can'
+img_dir = 'trashcan'
 
 # The camera mode
 cam_mode = 'all'
