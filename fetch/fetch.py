@@ -200,6 +200,65 @@ def block_for_trajectory_cmd(command_client, cmd_id, timeout_sec=None, verbose=F
 
     return False
 
+def compute_stand_location_and_yaw(vision_tform_target, robot_state_client,
+                                   distance_margin):
+    # Compute drop-off location:
+    #   Draw a line from Spot to the trashcan
+    #   Back up 2.0 meters on that line
+    vision_tform_robot = frame_helpers.get_a_tform_b(
+        robot_state_client.get_robot_state(
+        ).kinematic_state.transforms_snapshot, frame_helpers.VISION_FRAME_NAME,
+        frame_helpers.GRAV_ALIGNED_BODY_FRAME_NAME)
+
+    # Compute vector between robot and trashcan
+    robot_rt_trashcan_ewrt_vision = [
+        vision_tform_robot.x - vision_tform_target.x,
+        vision_tform_robot.y - vision_tform_target.y,
+        vision_tform_robot.z - vision_tform_target.z
+    ]
+
+    # Compute the unit vector.
+    if np.linalg.norm(robot_rt_trashcan_ewrt_vision) < 0.01:
+        robot_rt_trashcan_ewrt_vision_hat = vision_tform_robot.transform_point(1, 0, 0)
+    else:
+        robot_rt_trashcan_ewrt_vision_hat = robot_rt_trashcan_ewrt_vision / np.linalg.norm(
+            robot_rt_trashcan_ewrt_vision)
+
+    # Starting at the trashcan, back up meters along the unit vector.
+    drop_position_rt_vision = [
+        vision_tform_target.x +
+        robot_rt_trashcan_ewrt_vision_hat[0] * distance_margin,
+        vision_tform_target.y +
+        robot_rt_trashcan_ewrt_vision_hat[1] * distance_margin,
+        vision_tform_target.z +
+        robot_rt_trashcan_ewrt_vision_hat[2] * distance_margin
+    ]
+    
+    # We also want to compute a rotation (yaw) so that we will face the trashcan when dropping.
+    # We'll do this by computing a rotation matrix with X along
+    #   -robot_rt_trashcan_ewrt_vision_hat (pointing from the robot to the trashcan) and Z straight up:
+    xhat = -robot_rt_trashcan_ewrt_vision_hat
+    zhat = [0.0, 0.0, 1.0]
+    yhat = np.cross(zhat, xhat)
+    mat = np.matrix([xhat, yhat, zhat]).transpose()
+    heading_rt_vision = math_helpers.Quat.from_matrix(mat).to_yaw()
+
+    return drop_position_rt_vision, heading_rt_vision
+
+def pose_dist(pose1, pose2):
+    diff_vec = [pose1.x - pose2.x, pose1.y - pose2.y, pose1.z - pose2.z]
+    return np.linalg.norm(diff_vec)
+
+
+def get_walking_params(max_linear_vel, max_rotation_vel):
+    max_vel_linear = geometry_pb2.Vec2(x=max_linear_vel, y=max_linear_vel)
+    max_vel_se2 = geometry_pb2.SE2Velocity(linear=max_vel_linear,
+                                           angular=max_rotation_vel)
+    vel_limit = geometry_pb2.SE2VelocityLimit(max_vel=max_vel_se2)
+    params = RobotCommandBuilder.mobility_params()
+    params.vel_limit.CopyFrom(vel_limit)
+    return params
+
 def main(argv):
     parser = argparse.ArgumentParser()
     bosdyn.client.util.add_base_arguments(parser)
@@ -214,16 +273,16 @@ def main(argv):
                         required=True)
     parser.add_argument(
         '-p',
-        '--person-model',
-        help='Person detection model name running on the external server.')
+        '--trashcan-model',
+        help='trashcan detection model name running on the external server.')
     parser.add_argument('-c',
                         '--confidence-can',
                         help='Minimum confidence to return an object for the can (0.0 to 1.0)',
                         default=0.5,
                         type=float)
     parser.add_argument('-e',
-                        '--confidence-person',
-                        help='Minimum confidence for person detection (0.0 to 1.0)',
+                        '--confidence-trashcan',
+                        help='Minimum confidence for trashcan detection (0.0 to 1.0)',
                         default=0.6,
                         type=float)
     options = parser.parse_args(argv)
@@ -288,25 +347,25 @@ def main(argv):
                 command_client.robot_command(stow_cmd)
 
                 # NOTE: we'll enable this code in Part 5, when we understand it.
-                # -------------------------
-                # # Walk to the object.
-                # walk_rt_vision, heading_rt_vision = compute_stand_location_and_yaw(
-                    # vision_tform_can, robot_state_client, distance_margin=1.0)
+                
+                # Walk to the object.
+                walk_rt_vision, heading_rt_vision = compute_stand_location_and_yaw(
+                    vision_tform_can, robot_state_client, distance_margin=1.0)
 
-                # move_cmd = RobotCommandBuilder.trajectory_command(
-                    # goal_x=walk_rt_vision[0],
-                    # goal_y=walk_rt_vision[1],
-                    # goal_heading=heading_rt_vision,
-                    # frame_name=frame_helpers.VISION_FRAME_NAME,
-                    # params=get_walking_params(0.5, 0.5))
-                # end_time = 5.0
-                # cmd_id = command_client.robot_command(command=move_cmd,
-                                                      # end_time_secs=time.time() +
-                                                      # end_time)
+                move_cmd = RobotCommandBuilder.trajectory_command(
+                    goal_x=walk_rt_vision[0],
+                    goal_y=walk_rt_vision[1],
+                    goal_heading=heading_rt_vision,
+                    frame_name=frame_helpers.VISION_FRAME_NAME,
+                    params=get_walking_params(0.5, 0.5))
+                end_time = 5.0
+                cmd_id = command_client.robot_command(command=move_cmd,
+                                                      end_time_secs=time.time() +
+                                                      end_time)
 
-                # # Wait until the robot reports that it is at the goal.
-                # block_for_trajectory_cmd(command_client, cmd_id, timeout_sec=5, verbose=True)
-                # -------------------------
+                # Wait until the robot reports that it is at the goal.
+                block_for_trajectory_cmd(command_client, cmd_id, timeout_sec=5, verbose=True)
+                
 
                 # The ML result is a bounding box.  Find the center.
                 (center_px_x,
@@ -393,18 +452,125 @@ def main(argv):
 
             # Move the arm to a carry position.
             print('')
-            print('Grasp finished, search for a person...')
+            print('Grasp finished, search for a trashcan...')
             carry_cmd = RobotCommandBuilder.arm_carry_command()
             command_client.robot_command(carry_cmd)
 
             # Wait for the carry command to finish
             time.sleep(0.75)
 
-            # For now, we'll just exit...
-            print('')
-            print('Done for now, returning control to tablet in 5 seconds...')
-            time.sleep(5.0)
-            break
+            trashcan = None
+            while trashcan is None:
+                #can, image, vision_tform_can       = get_obj_and_img(network_compute_client, options.ml_service, options.model, options.confidence_can, kImageSources, 'can')       
+                trashcan, image, vision_tform_trashcan = get_obj_and_img(network_compute_client, options.ml_service, options.trashcan_model, options.confidence_trashcan, kImageSources, 'trashcan')
+
+            drop_position_rt_vision, heading_rt_vision = compute_stand_location_and_yaw(
+                vision_tform_trashcan, robot_state_client, distance_margin=2.0)
+
+            wait_position_rt_vision, wait_heading_rt_vision = compute_stand_location_and_yaw(
+                vision_tform_trashcan, robot_state_client, distance_margin=3.0)
+
+            # Tell the robot to go there
+
+            # Limit the speed so we don't charge at the trashcan.
+            move_cmd = RobotCommandBuilder.trajectory_command(
+                goal_x=drop_position_rt_vision[0],
+                goal_y=drop_position_rt_vision[1],
+                goal_heading=heading_rt_vision,
+                frame_name=frame_helpers.VISION_FRAME_NAME,
+                params=get_walking_params(0.5, 0.5))
+            end_time = 5.0
+            cmd_id = command_client.robot_command(command=move_cmd,
+                                                end_time_secs=time.time() +
+                                                end_time)
+
+
+            # Wait until the robot reports that it is at the goal.
+            block_for_trajectory_cmd(command_client, cmd_id, timeout_sec=5, verbose=True)
+
+            print('Arrived at goal, dropping object...')
+
+            # Do an arm-move to gently put the object down.
+            # Build a position to move the arm to (in meters, relative to and expressed in the gravity aligned body frame).
+            x = 0.75
+            y = 0
+            z = -0.25
+            hand_ewrt_flat_body = geometry_pb2.Vec3(x=x, y=y, z=z)
+
+            # Point the hand straight down with a quaternion.
+            qw = 0.707
+            qx = 0
+            qy = 0.707
+            qz = 0
+            flat_body_Q_hand = geometry_pb2.Quaternion(w=qw, x=qx, y=qy, z=qz)
+
+            flat_body_tform_hand = geometry_pb2.SE3Pose(
+                position=hand_ewrt_flat_body, rotation=flat_body_Q_hand)
+
+            robot_state = robot_state_client.get_robot_state()
+            vision_tform_flat_body = frame_helpers.get_a_tform_b(
+                robot_state.kinematic_state.transforms_snapshot,
+                frame_helpers.VISION_FRAME_NAME,
+                frame_helpers.GRAV_ALIGNED_BODY_FRAME_NAME)
+
+            vision_tform_hand_at_drop = vision_tform_flat_body * math_helpers.SE3Pose.from_obj(
+                flat_body_tform_hand)
+
+            # duration in seconds
+            seconds = 1
+
+            arm_command = RobotCommandBuilder.arm_pose_command(
+                vision_tform_hand_at_drop.x, vision_tform_hand_at_drop.y,
+                vision_tform_hand_at_drop.z, vision_tform_hand_at_drop.rot.w,
+                vision_tform_hand_at_drop.rot.x, vision_tform_hand_at_drop.rot.y,
+                vision_tform_hand_at_drop.rot.z, frame_helpers.VISION_FRAME_NAME,
+                seconds)
+
+            # Keep the gripper closed.
+            gripper_command = RobotCommandBuilder.claw_gripper_open_fraction_command(
+                0.0)
+
+            # Combine the arm and gripper commands into one RobotCommand
+            command = RobotCommandBuilder.build_synchro_command(
+                gripper_command, arm_command)
+
+            # Send the request
+            cmd_id = command_client.robot_command(command)
+
+            # Wait until the arm arrives at the goal.
+            block_until_arm_arrives(command_client, cmd_id)
+
+            # Open the gripper
+            gripper_command = RobotCommandBuilder.claw_gripper_open_fraction_command(
+                1.0)
+            command = RobotCommandBuilder.build_synchro_command(gripper_command)
+            cmd_id = command_client.robot_command(command)
+
+            # Wait for the dogtoy to fall out
+            time.sleep(1.5)
+
+            # Stow the arm.
+            stow_cmd = RobotCommandBuilder.arm_stow_command()
+            command_client.robot_command(stow_cmd)
+
+            time.sleep(1)
+
+            print('Backing up and waiting...')
+
+            # Back up one meter and wait for the trashcan to throw the object again.
+            move_cmd = RobotCommandBuilder.trajectory_command(
+                goal_x=wait_position_rt_vision[0],
+                goal_y=wait_position_rt_vision[1],
+                goal_heading=wait_heading_rt_vision,
+                frame_name=frame_helpers.VISION_FRAME_NAME,
+                params=get_walking_params(0.5, 0.5))
+            end_time = 5.0
+            cmd_id = command_client.robot_command(command=move_cmd,
+                                                end_time_secs=time.time() +
+                                                end_time)
+
+            # Wait until the robot reports that it is at the goal.
+            block_for_trajectory_cmd(command_client, cmd_id, timeout_sec=5, verbose=True)
 
 
 if __name__ == '__main__':
