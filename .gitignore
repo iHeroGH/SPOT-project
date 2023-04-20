@@ -1,8 +1,8 @@
 spot_env*/
 spot-sdk/
 
-/fetch/objects/models/my_model/*
-/fetch/objects/models/my_model/*
+/fetch/objects/can/models/my_model/*
+/fetch/objects/trashcan/models/my_model/*
 
 tf-models/
 protoc/
