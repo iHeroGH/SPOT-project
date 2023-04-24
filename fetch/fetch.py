@@ -204,7 +204,7 @@ def compute_stand_location_and_yaw(vision_tform_target, robot_state_client,
                                    distance_margin):
     # Compute drop-off location:
     #   Draw a line from Spot to the trashcan
-    #   Back up 2.0 meters on that line
+    #   Back up 0.5 meters on that line
     vision_tform_robot = frame_helpers.get_a_tform_b(
         robot_state_client.get_robot_state(
         ).kinematic_state.transforms_snapshot, frame_helpers.VISION_FRAME_NAME,
@@ -464,11 +464,12 @@ def main(argv):
                 #can, image, vision_tform_can       = get_obj_and_img(network_compute_client, options.ml_service, options.model, options.confidence_can, kImageSources, 'can')       
                 trashcan, image, vision_tform_trashcan = get_obj_and_img(network_compute_client, options.ml_service, options.trashcan_model, options.confidence_trashcan, kImageSources, 'trashcan')
 
+            # Stops 0.6 meters away to where it will drop the can, stands 2 meters away when it is just waiting
             drop_position_rt_vision, heading_rt_vision = compute_stand_location_and_yaw(
-                vision_tform_trashcan, robot_state_client, distance_margin=2.0)
+                vision_tform_trashcan, robot_state_client, distance_margin=0.6)
 
             wait_position_rt_vision, wait_heading_rt_vision = compute_stand_location_and_yaw(
-                vision_tform_trashcan, robot_state_client, distance_margin=3.0)
+                vision_tform_trashcan, robot_state_client, distance_margin=2.0)
 
             # Tell the robot to go there
 
@@ -492,9 +493,9 @@ def main(argv):
 
             # Do an arm-move to gently put the object down.
             # Build a position to move the arm to (in meters, relative to and expressed in the gravity aligned body frame).
-            x = 0.75
-            y = 0
-            z = -0.25
+            x = 0.751    # Arm extends forward 0.75 meters
+            y = 0   # Arm faces straight forward, no left or right movement
+            z = 1.0 # Has the arm reach up vertically 1 meter
             hand_ewrt_flat_body = geometry_pb2.Vec3(x=x, y=y, z=z)
 
             # Point the hand straight down with a quaternion.
